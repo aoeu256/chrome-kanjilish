@@ -48,6 +48,24 @@ function wordsplit(s) {
 		
 	return [tokens, splitter];
 }
+
+function newWordSplit(s) {
+	var tokens = [];
+	var lastc = c = 0;
+	while(c < s.length) {
+		while (_is_valid_character(s[c]) && c < s.length) c++;
+		if(c > lastc) {
+			tokens.push([0, s.substr(lastc, c-lastc)]);		
+			lastc = c;
+		}
+		while (!_is_valid_character(s[c]) && c < s.length) c++;
+		if(c > lastc) {
+			tokens.push([1, s.substr(lastc, c-lastc)]);
+			lastc = c;
+		}
+	}
+	return tokens;
+}
  
  function isVowels(b) {
 	var vow = toSet('aeiou');
@@ -232,6 +250,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
 
 $(document).ready(function() {
+	//console.log(JSON.stringify(newWordSplit('wat th')));
+	//console.log(JSON.stringify(newWordSplit('| |wat<_th ')));
 	chrome.extension.sendRequest({'greeting': 'options'}, function(options) {
 		if(options.enabled) enable();
 	});
