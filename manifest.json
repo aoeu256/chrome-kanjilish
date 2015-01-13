@@ -1,0 +1,23 @@
+{
+  "name": "Kanji immersion tool",
+  "version": "0.1",
+  "manifest_version": 2,
+  "browser_action": {
+      "default_title": "Swap words with kanji words for added immersion",
+      "default_icon": "icon.png"
+  },
+  "background": {
+	"page":"background.html",
+	"persistent": true
+  },
+  "permissions": ["tabs", "contextMenus"],  
+  "web_accessible_resources": ["Heisig.xml", "Kanjidic.xml", "KIC.xml"], 
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*", "ftp://*/*", "file:///*"],
+      "js": ["jquery.js", "wordswap.js"],
+	  "run_at": "document_end"
+    }
+	]	
+  
+}
