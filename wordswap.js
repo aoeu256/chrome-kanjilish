@@ -26,30 +26,6 @@ function keys(obj) {
 }
 
 function wordsplit(s) {
-	var curToken = "";
-	var curSplitter = "";
-	var tokens = [];
-	var splitter = [];
-	for(var c=0; c<s.length; c++) {
-		if (_is_valid_character(s[c])) {
-			curToken += s[c];
-			if(curSplitter) splitter.push(curSplitter);
-			curSplitter = "";
-		}
-			
-		else {
-			curSplitter += s[c];
-			if(curToken) tokens.push(curToken);
-			curToken = "";
-		}
-	}
-	if(curSplitter) splitter.push(curSplitter);
-	if(curToken) tokens.push(curToken);
-		
-	return [tokens, splitter];
-}
-
-function newWordSplit(s) {
 	var tokens = [];
 	var lastc = c = 0;
 	while(c < s.length) {
@@ -137,32 +113,31 @@ function rootWord(key) {
 function doString(s) {
 	var newBody="";
 	var splits = wordsplit(s);
-	var words = splits[0];
-	var seps = splits[1];
-	var splitOff = 0;
-	var sep = "";
-	
-	// WORD <SEP> WORD
-	// <SEP> WORD <SEP> WORD <SEP>
-
-	if(seps.length > words.length) {// more seps
-		newBody = seps[0];
-		splitOff++;
-	}
-	
-	for(var i=0; i<words.length; i++) {
-		var key = rootWord(words[i].toLowerCase());
-		var val = dict[key];
-		var text = words[i];
-		
+	var text, sep;
+	var i = 0;
+	var presep = true;
+	while(i<splits.length) {
+		if(splits[i][0]) { // seperator
+			sep = splits[i][1];
+			if(i < splits.length) {
+				i++;
+				continue;
+			} else {
+				newBody += sep;
+				break;				
+			}
+		}
+		text = splits[i][1];
+		var key = rootWord(text.toLowerCase());
+		var val = dict[key];		
 		if(val) text = convertWord(text, val);
 		
-		var sep = seps[i+splitOff];
 		if(sep && (sep !== " ") || (sep === " " && !val)) {
 			newBody += sep;
+			sep = '';
 		}
 		newBody += text;
-		
+		i++;
 	}
 	return newBody;
 }
@@ -225,7 +200,7 @@ function getSelectionCoordinates(start) {
         range = document.selection.createRange();
         range.collapse(start);
         x = range.boundingLeft;
-        y = range.boundingTop-4;
+        y = range.boundingTop;
     }
     return {x: x, y: y};
 }

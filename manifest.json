@@ -1,6 +1,6 @@
 {
   "name": "Kanji immersion tool",
-  "version": "0.1",
+  "version": "0.2",
   "manifest_version": 2,
   "browser_action": {
       "default_title": "Swap words with kanji words for added immersion",
