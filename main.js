@@ -17,7 +17,7 @@ var Main = {
 	},
 	
 	onTabSelect: function(tabId) {
-		if(this.options.enabled)
+		if(Main.options.enabled)
 			chrome.tabs.sendMessage(tabId, {"type":"enable"});
 		else
 			chrome.tabs.sendMessage(tabId, {"type":"disable"});
@@ -57,10 +57,11 @@ var Main = {
 	},
 	initChrome: function () {
 		chrome.browserAction.onClicked.addListener(Main.inlineToggle);
+		chrome.tabs.onSelectionChanged.addListener(Main.onTabSelect);
 
 		chrome.contextMenus.create({'title': 'Toggle toolbar', 'contexts': ['page'], 'onclick':function(info, tab) {	
 			Main.options.enableToolbar = true;
-			chrome.tabs.sendMessage(tab.id, {"type":"updateToolbar", 'state':options.enableToolbar});
+			chrome.tabs.sendMessage(tab.id, {"type":"updateToolbar", 'state':Main.options.enableToolbar});
 		}});
 
 		chrome.contextMenus.create({'title': 'Lookup character', 'contexts': ['selection'], 'onclick':function(info, tab) {
@@ -90,7 +91,6 @@ var Main = {
 		chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 			console.log(sender.tab ? " content script:" + sender.tab.url : "from the extension" + request);
 			if (request.greeting == "getDict") {
-				console.log('sendin dic');
 				sendResponse({"data": Main.data, "options": Main.options});
 			} else if(request.greeting === "options") {
 				sendResponse(Main.options);

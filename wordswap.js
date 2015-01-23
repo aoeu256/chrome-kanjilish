@@ -1,7 +1,7 @@
 var content = {
 	enabled: true,
 	oldBody: [],
-	debug: false
+	debug: true
 };
 
 function _is_valid_character(ch)
@@ -120,7 +120,7 @@ function doString(s) {
 	while(i<splits.length) {
 		if(splits[i][0]) { // seperator
 			sep = splits[i][1];
-			if(i < splits.length) {
+			if(i < splits.length-1) {
 				i++;
 				continue;
 			} else {
@@ -144,6 +144,10 @@ function doString(s) {
 }
 
 function enable() {
+	if(content.enabled) { // already enabled
+		console.log('already enabled, doing nothing');
+		return;
+	}
 	chrome.extension.sendRequest({"greeting": "getDict"}, function(response) {
 		dict = response.data;
 		startArray = $('body').contents();
@@ -172,16 +176,19 @@ function enable() {
 		}
 
 		recurseSwitch(startArray);
+		//console.log(doString('function(object activeInfo) {...};'));
+		content.enabled = true;
 	});
 }
 
-function disable() {
+function disable() {	
 	for(var i in content.oldBody) {
 		var node = content.oldBody[i][0];
 		var attr = content.oldBody[i][1];
 		var oldval = content.oldBody[i][2];
-		$(node).attr(attr, oldval);
+		node[attr] = oldval;
 	}
+	content.enabled = false;
 }
 
 function getSelectionCoordinates(start) {
