@@ -1,6 +1,7 @@
 var content = {
 	enabled: true,
-	oldBody: null
+	oldBody: null,
+	debug: false
 };
 
 function _is_valid_character(ch)
@@ -43,7 +44,7 @@ function wordsplit(s) {
 	return tokens;
 }
  
- function isVowels(b) {
+function isVowels(b) {
 	var vow = toSet('aeiou');
 	var g = b.toLowerCase();
 	for(var c in g) {
@@ -53,7 +54,7 @@ function wordsplit(s) {
 	return true;
  }
  
- function toSet(ary) {
+function toSet(ary) {
 	var obj = {};
 	for(var i=0; i<ary.length; i++) obj[ary[i]] = true;
 	return obj;
@@ -152,23 +153,12 @@ function enable() {
 		function recurseSwitch(ary) {
 			for(var i=0; i<ary.length; i++) {
 				if(!ary[i]) continue;
-				//nodeType === 1 // P
-				//nodeType === 2 
-				//nodeType === 3
-				/*if(ary[i].children && ary[i].children.length>0) {
-					for(var i=0; i<ary[i].childNodes.length; i++) {
-						if(ary[i].childNodes[i].data)
-							recurseSwitch(ary[i].children);
-						else
-							
-					}
-				}*/
 				if(ary[i].childNodes && ary[i].childNodes.length>0) {
 					recurseSwitch(ary[i].childNodes);
-				} else if (ary[i].innerText && ary[i].innerText !== "") { // && (ary[i].nodeType === 1 || ary[i].nodeType == 3)) {
-					ary[i].innerHTML = doString(ary[i].innerHTML);
 				} else if(ary[i].data) {
-					ary[i].data = doString(ary[i].data);
+					ary[i].data = doString(ary[i].data);					
+				} else if (ary[i].textContent) { // && (ary[i].nodeType === 1 || ary[i].nodeType == 3)) {
+					ary[i].innerHTML = doString(ary[i].innerHTML);
 				}
 			}
 		}
@@ -209,25 +199,50 @@ function popup(text) {
 	var text = ''+text;
 	var coords = getSelectionCoordinates();
 	var popup = $('<div>'+text+'</div>');
-	popup.css({'position': 'absolute', 'border':'solid thin black', 'background-color':'Beige', 'left':coords.x, 'top':coords.y});
+	popup.css({'position': 'absolute', 'border':'solid thin black', 'background-color':'Beige', 'left':coords.x, 'top':coords.y, 'z-index':1000});
 	popup.appendTo('body');
 	popup.delay(100+text.length*35).fadeOut(400);
 }
 
+function createToolbar() {
+	var toolbar = $('<div id="kanji-immersion-toolbar"></div>');
+	toolbar.css({'position': 'fixed', 'top': '-5px', 'left': 0, 
+		'width': '100%', 'z-index': 100, 'margin': 0, 'padding': 0});
+	toolbar.html('<input id="kit-txt" size="35" type="text"/><button id="kit-convert">Convert</button>');
+	toolbar.appendTo('body');
+	
+	var submit = function() {
+		$('#kit-txt')[0].value = doString($('#kit-txt')[0].value);
+		$('#kit-txt').select();
+	}
+	$('#kit-convert').click(function() { submit(); });
+	$('#kit-txt').keypress(function(evt){ if(evt.which==13)submit(); });
+	
+}
+
+function updateToolbar() {
+	var elt = $('#kanji-immersion-toolbar');
+	if(elt.length==0)
+		createToolbar();
+	else
+		elt.remove();
+}
+
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-	console.log('got request '+request.type);
+	if(content.debug) console.log(JSON.stringify(request));
 	switch(request.type) {
 		case 'enable': enable(); break;
 		case 'disable': disable(); break;
 		case 'popup': popup(request.text); break;
+		case 'updateToolbar': updateToolbar(request.state); break;
 	}
 });
-
 
 $(document).ready(function() {
 	//console.log(JSON.stringify(newWordSplit('wat th')));
 	//console.log(JSON.stringify(newWordSplit('| |wat<_th ')));
 	chrome.extension.sendRequest({'greeting': 'options'}, function(options) {
 		if(options.enabled) enable();
+		if(options.enableToolbar) updateToolbar(true);
 	});
 });
