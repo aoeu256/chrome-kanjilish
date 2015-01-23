@@ -1,6 +1,6 @@
 var content = {
 	enabled: true,
-	oldBody: null,
+	oldBody: [],
 	debug: false
 };
 
@@ -148,7 +148,13 @@ function enable() {
 		dict = response.data;
 		startArray = $('body').contents();
 		
-		content.oldBody = $('body').html();
+		content.oldBody = [];
+
+		function alter(node, attr) {
+			var value = node[attr];
+			content.oldBody.push([node, attr, value]);
+			node[attr] = doString(value);
+		}
 		
 		function recurseSwitch(ary) {
 			for(var i=0; i<ary.length; i++) {
@@ -156,9 +162,11 @@ function enable() {
 				if(ary[i].childNodes && ary[i].childNodes.length>0) {
 					recurseSwitch(ary[i].childNodes);
 				} else if(ary[i].data) {
-					ary[i].data = doString(ary[i].data);					
+					//ary[i].data = doString(ary[i].data);					
+					alter(ary[i], 'data');
 				} else if (ary[i].textContent) { // && (ary[i].nodeType === 1 || ary[i].nodeType == 3)) {
-					ary[i].innerHTML = doString(ary[i].innerHTML);
+					alter(ary[i], 'innerHTML');
+					//ary[i].innerHTML = doString(ary[i].innerHTML);
 				}
 			}
 		}
@@ -168,8 +176,12 @@ function enable() {
 }
 
 function disable() {
-	if(content.oldBody) 
-		$('body').html(content.oldBody); 
+	for(var i in content.oldBody) {
+		var node = content.oldBody[i][0];
+		var attr = content.oldBody[i][1];
+		var oldval = content.oldBody[i][2];
+		$(node).attr(attr, oldval);
+	}
 }
 
 function getSelectionCoordinates(start) {

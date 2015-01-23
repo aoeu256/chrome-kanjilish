@@ -9,8 +9,9 @@ function keys(obj) {
 var Main = {
 	data: {},
 	loadFiles: ['Heisig.xml', 'Kanjidic.xml', 'KIC.xml'],
+	nloaded: 0,
 	
-	options = {
+	options: {
 		enabled: false,
 		enableToolbar: true
 	},
@@ -22,8 +23,8 @@ var Main = {
 			chrome.tabs.sendMessage(tabId, {"type":"disable"});
 	},
 	inlineToggle: function(tab, mode) {
-		options.enabled = !options.enabled;
-		if(options.enabled) {
+		Main.options.enabled = !Main.options.enabled;
+		if(Main.options.enabled) {
 			chrome.browserAction.setBadgeBackgroundColor({"color":[255,255,0,255]});
 			chrome.browserAction.setBadgeText({"text":"On"});	
 			if(tab) chrome.tabs.sendMessage(tab.id, {"type":"enable"});
@@ -44,14 +45,14 @@ var Main = {
 
 		$(dat).find("entry").each(function() {				
 			var elt = $(this);
-			extendList(data, elt.attr('key'), elt.attr('kanji'));
+			extendList(Main.data, elt.attr('key'), elt.attr('kanji'));
 		});
-		nloaded++;
-		if(nloaded == loadFiles.length) {
-			for(var key in data) {			
-				data[key] = keys(data[key]);
-			}
-			console.log(data['accompany']);
+		Main.nloaded++;
+		if(Main.nloaded == Main.loadFiles.length) {
+			for(var key in Main.data)
+				Main.data[key] = keys(Main.data[key]);
+
+			console.log(Main.data['accompany']); // test loading			
 		}
 	},
 	initChrome: function () {
@@ -81,9 +82,8 @@ var Main = {
 		}});
 	},
 	load: function () {
-		for(var filename in Main.loadFiles) {		
-			$.get(Main.loadFiles[filename], loadData);
-		}
+		for(var filename in Main.loadFiles)
+			$.get(Main.loadFiles[filename], Main.loadData);
 		
 		Main.inlineToggle();
 
@@ -91,9 +91,9 @@ var Main = {
 			console.log(sender.tab ? " content script:" + sender.tab.url : "from the extension" + request);
 			if (request.greeting == "getDict") {
 				console.log('sendin dic');
-				sendResponse({"data": data, "options": options});
+				sendResponse({"data": Main.data, "options": Main.options});
 			} else if(request.greeting === "options") {
-				sendResponse(options);
+				sendResponse(Main.options);
 			} else {
 				sendResponse({}); // snub them.
 			}
