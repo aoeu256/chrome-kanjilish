@@ -10,7 +10,7 @@ var Main = {
 	data: {},	
 	nloaded: 0,
 	loadFiles: [],
-	dicts: {'Heisig':true, 'Kanjidic':false, 'KIC':false};
+	dicts: {'Heisig':true, 'Kanjidic':false, 'KIC':false},
 	config: {'Enable-Keys':true},
 	options: {
 		enabled: false,
@@ -53,10 +53,26 @@ var Main = {
 			for(var key in Main.data)
 				Main.data[key] = keys(Main.data[key]);
 
-			console.log(Main.data['accompany']); // test loading			
+			//console.log(Main.data['accompany']); // test loading			
 		}
 	},
+	loadConfig: function() {
+		for(var k in Main.config) {
+			Main.config[k] = JSON.parse(localStorage['wsap-'+k] || Main.config[k]);
+		}
+		Main.loadFiles = [];
+		for(var d in Main.dicts) { 
+			if(Main.config['Enable-'+d]) Main.loadFiles.push(d+'.xml');
+		}
+		Main.nloaded = 0;
+		Main.data = {};
+		for(var filename in Main.loadFiles)
+			$.get(Main.loadFiles[filename], Main.loadData);		
+	},
 	initChrome: function () {
+		for(var k in Main.dicts)
+			Main.config['Enable-'+k] = Main.dicts[k];		
+
 		chrome.browserAction.onClicked.addListener(Main.inlineToggle);
 		chrome.tabs.onSelectionChanged.addListener(Main.onTabSelect);
 
@@ -84,10 +100,7 @@ var Main = {
 		}});
 	},
 	load: function () {
-		for(var d in Main.dicts) Main.loadfiles.push(d+'.xml');
-		for(var filename in Main.loadFiles)
-			$.get(Main.loadFiles[filename], Main.loadData);
-		
+		Main.loadConfig();		
 		Main.inlineToggle();
 
 		chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
