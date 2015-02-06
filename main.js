@@ -7,10 +7,11 @@ function keys(obj) {
 }
 
 var Main = {
-	data: {},
-	loadFiles: ['Heisig.xml', 'Kanjidic.xml', 'KIC.xml'],
+	data: {},	
 	nloaded: 0,
-	
+	loadFiles: [],
+	dicts: {'Heisig':true, 'Kanjidic':false, 'KIC':false};
+	config: {'Enable-Keys':true},
 	options: {
 		enabled: false,
 		enableToolbar: true
@@ -83,6 +84,7 @@ var Main = {
 		}});
 	},
 	load: function () {
+		for(var d in Main.dicts) Main.loadfiles.push(d+'.xml');
 		for(var filename in Main.loadFiles)
 			$.get(Main.loadFiles[filename], Main.loadData);
 		

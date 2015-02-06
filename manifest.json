@@ -2,6 +2,9 @@
   "name": "Kanji immersion tool",
   "version": "0.2",
   "manifest_version": 2,
+  
+  "icons": { "48": "icon48.png"},
+  
   "browser_action": {
       "default_title": "Swap words with kanji words for added immersion",
       "default_icon": "go.png"
@@ -10,6 +13,7 @@
 	"page":"background.html",
 	"persistent": true
   },
+  "options_page": "options.html",
   "permissions": ["tabs", "contextMenus"],  
   "web_accessible_resources": ["Heisig.xml", "Kanjidic.xml", "KIC.xml"], 
   "content_scripts": [
