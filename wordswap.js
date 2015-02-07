@@ -226,7 +226,7 @@ function popup(text) {
 function createToolbar() {
 	var toolbar = $('<div id="kanji-immersion-toolbar"></div>');
 	toolbar.css({'position': 'fixed', 'top': '-5px', 'left': 0, 
-		'width': '100%', 'z-index': 100, 'margin': 0, 'padding': 0});
+		'width': '40em', 'z-index': 100, 'margin': 0, 'padding': 0, 'font-family':'Arial, Helvetica, sans serif', 'font-size':12);
 	toolbar.html('<input id="kit-txt" size="35" type="text"/><button id="kit-convert" alt="hold to drag the bar">Convert</button>');
 	toolbar.appendTo('body');
 	
