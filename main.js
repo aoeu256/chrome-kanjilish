@@ -75,9 +75,9 @@ var Main = {
 
 		chrome.browserAction.onClicked.addListener(Main.inlineToggle);
 		chrome.tabs.onSelectionChanged.addListener(Main.onTabSelect);
-
+		chrome.contextMenus.removeAll();
 		chrome.contextMenus.create({'title': 'Toggle toolbar', 'contexts': ['page'], 'onclick':function(info, tab) {	
-			Main.options.enableToolbar = true;
+			Main.options.enableToolbar = !Main.options.enableToolbar;
 			chrome.tabs.sendMessage(tab.id, {"type":"updateToolbar", 'state':Main.options.enableToolbar});
 		}});
 

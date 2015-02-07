@@ -227,14 +227,32 @@ function createToolbar() {
 	var toolbar = $('<div id="kanji-immersion-toolbar"></div>');
 	toolbar.css({'position': 'fixed', 'top': '-5px', 'left': 0, 
 		'width': '100%', 'z-index': 100, 'margin': 0, 'padding': 0});
-	toolbar.html('<input id="kit-txt" size="35" type="text"/><button id="kit-convert">Convert</button>');
+	toolbar.html('<input id="kit-txt" size="35" type="text"/><button id="kit-convert" alt="hold to drag the bar">Convert</button>');
 	toolbar.appendTo('body');
 	
 	var submit = function() {
 		$('#kit-txt')[0].value = doString($('#kit-txt')[0].value);
 		$('#kit-txt').select();
 	}
-	$('#kit-convert').click(function() { submit(); });
+	$('#kit-convert').click(function() { if(!($(this).attr('drag'))) submit(); });
+	$('#kit-convert').mousedown(function(e) {
+		var kitpos = $('#kanji-immersion-toolbar').position();
+		var dpos = {left: e.clientX-kitpos.left , top: e.clientY-kitpos.top};
+		$(this).attr('drag', true);
+		dragfunc = function(e) {
+			e.preventDefault();
+			$('#kanji-immersion-toolbar').css({left: e.clientX-dpos.left, top:e.clientY-dpos.top});
+		};
+		releasefunc = function(e) {
+			console.log('release');
+			dragfunc(e);
+			$('body').unbind('mousemove', dragfunc);
+			$('body').unbind('mouseup', releasefunc);
+		}
+		$('body').bind('mousemove', dragfunc);
+		$('body').bind('mouseup', releasefunc);
+	}); 
+
 	$('#kit-txt').keypress(function(evt){ if(evt.which==13)submit(); });
 	
 }
